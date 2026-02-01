@@ -32,14 +32,18 @@
             font-weight: bold;
             color: #203a43;
         }
-        input {
+        small {
+            color: #555;
+            font-size: 13px;
+        }
+        input, select {
             width: 100%;
             padding: 12px;
             border-radius: 8px;
             border: 1px solid #ccc;
             font-size: 15px;
         }
-        input:focus {
+        input:focus, select:focus {
             outline: none;
             border-color: #2c5364;
         }
@@ -106,14 +110,14 @@
         </div>
 
         <div>
-            <label>Interés (%)</label>
+            <label>Interés anual (%)</label>
             <input type="number" name="interes" step="0.01" required>
+            <small>La tasa se ajusta automáticamente según la frecuencia de pago</small>
         </div>
 
         <div>
             <label>Frecuencia de pago</label>
-            <select name="frecuencia" required
-                    style="width:100%;padding:12px;border-radius:8px;border:1px solid #ccc;">
+            <select name="frecuencia" required>
                 <option value="semanal">Semanal</option>
                 <option value="quincenal">Quincenal</option>
                 <option value="mensual">Mensual</option>
@@ -124,7 +128,6 @@
             <label>Número de pagos</label>
             <input type="number" name="periodos" required>
         </div>
-
 
         <div class="full">
             <button type="submit">💾 Registrar Cliente</button>
@@ -138,4 +141,3 @@
 
 </body>
 </html>
-```
