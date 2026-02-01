@@ -1,36 +1,30 @@
+import os
 from flask import Flask, render_template, request, redirect, url_for, send_file
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime, timedelta
 from reportlab.lib.pagesizes import letter
 from reportlab.pdfgen import canvas
 import io
-import os
 
 app = Flask(__name__)
 
-# ==========================
-# CONFIGURACIÓN POSTGRESQL
-# ==========================
-app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv(
-    "DATABASE_URL",
-    "sqlite:///local.db"  # fallback local
-)
+# 🔐 Configuración PostgreSQL (Render)
+app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get("DATABASE_URL")
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
 db = SQLAlchemy(app)
 
-# ==========================
-# CONSTANTES
-# ==========================
 MORA_POR_DIA = 50  # pesos por día de atraso
 
-# ==========================
-# MODELOS
-# ==========================
+
+# =========================
+# 📦 MODELOS
+# =========================
+
 class Cliente(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    nombre = db.Column(db.String(120))
-    telefono = db.Column(db.String(50))
+    nombre = db.Column(db.String(100))
+    telefono = db.Column(db.String(20))
     direccion = db.Column(db.String(200))
     garantia = db.Column(db.String(200))
     monto = db.Column(db.Float)
@@ -42,16 +36,11 @@ class Cliente(db.Model):
     fecha = db.Column(db.String(20))
     liquidado = db.Column(db.Boolean, default=False)
 
-    pagos = db.relationship(
-        "Pago",
-        backref="cliente",
-        cascade="all, delete-orphan"
-    )
+    pagos = db.relationship("Pago", backref="cliente", cascade="all, delete")
 
 
 class Pago(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    cliente_id = db.Column(db.Integer, db.ForeignKey("cliente.id"))
     numero = db.Column(db.Integer)
     periodo = db.Column(db.String(50))
     fecha = db.Column(db.String(20))
@@ -60,10 +49,13 @@ class Pago(db.Model):
     mora = db.Column(db.Float, default=0)
     dias_atraso = db.Column(db.Integer, default=0)
 
+    cliente_id = db.Column(db.Integer, db.ForeignKey("cliente.id"))
 
-# ==========================
-# RUTAS
-# ==========================
+
+# =========================
+# 🏠 RUTAS
+# =========================
+
 @app.route("/")
 def index():
     clientes = Cliente.query.all()
@@ -73,37 +65,32 @@ def index():
 @app.route("/nuevo", methods=["GET", "POST"])
 def nuevo_cliente():
     if request.method == "POST":
-        nombre = request.form["nombre"]
-        telefono = request.form["telefono"]
-        direccion = request.form["direccion"]
-        garantia = request.form["garantia"]
-
         monto = float(request.form["monto"])
         interes = float(request.form["interes"])
-        frecuencia = request.form["frecuencia"]
         periodos = int(request.form["periodos"])
+        frecuencia = request.form["frecuencia"]
 
         total = round(monto + (monto * interes / 100), 2)
         pago = round(total / periodos, 2)
 
-        hoy = datetime.now()
-
         cliente = Cliente(
-            nombre=nombre,
-            telefono=telefono,
-            direccion=direccion,
-            garantia=garantia,
+            nombre=request.form["nombre"],
+            telefono=request.form["telefono"],
+            direccion=request.form["direccion"],
+            garantia=request.form["garantia"],
             monto=monto,
             interes=interes,
             frecuencia=frecuencia,
             periodos=periodos,
             total=total,
             pago=pago,
-            fecha=hoy.strftime("%d/%m/%Y")
+            fecha=datetime.now().strftime("%d/%m/%Y")
         )
 
         db.session.add(cliente)
         db.session.commit()
+
+        hoy = datetime.now()
 
         for i in range(periodos):
             if frecuencia == "semanal":
@@ -116,15 +103,16 @@ def nuevo_cliente():
                 fecha_pago = hoy + timedelta(days=30 * (i + 1))
                 etiqueta = "Mes"
 
-            pago_db = Pago(
-                cliente_id=cliente.id,
+            pago_obj = Pago(
                 numero=i + 1,
                 periodo=f"{etiqueta} {i + 1}",
                 fecha=fecha_pago.strftime("%d/%m/%Y"),
                 monto=pago,
-                estado="Pendiente"
+                estado="Pendiente",
+                cliente_id=cliente.id
             )
-            db.session.add(pago_db)
+
+            db.session.add(pago_obj)
 
         db.session.commit()
         return redirect(url_for("ver_cliente", cliente_id=cliente.id))
@@ -156,7 +144,6 @@ def ver_cliente(cliente_id):
     if restante < 0:
         restante = 0
 
-    cliente.liquidado = restante == 0
     db.session.commit()
 
     return render_template(
@@ -167,28 +154,10 @@ def ver_cliente(cliente_id):
     )
 
 
-@app.route("/abonar/<int:cliente_id>/<int:numero>")
-def abonar(cliente_id, numero):
-    pago = Pago.query.filter_by(
-        cliente_id=cliente_id,
-        numero=numero
-    ).first_or_404()
-
+@app.route("/abonar/<int:cliente_id>/<int:pago_id>")
+def abonar(cliente_id, pago_id):
+    pago = Pago.query.get_or_404(pago_id)
     pago.estado = "Pagado"
-    db.session.commit()
-
-    return redirect(url_for("ver_cliente", cliente_id=cliente_id))
-
-
-@app.route("/editar_cliente/<int:cliente_id>", methods=["POST"])
-def editar_cliente(cliente_id):
-    cliente = Cliente.query.get_or_404(cliente_id)
-
-    cliente.nombre = request.form["nombre"]
-    cliente.telefono = request.form["telefono"]
-    cliente.direccion = request.form["direccion"]
-    cliente.garantia = request.form["garantia"]
-
     db.session.commit()
     return redirect(url_for("ver_cliente", cliente_id=cliente_id))
 
@@ -208,8 +177,8 @@ def imprimir_pagos(cliente_id):
     buffer = io.BytesIO()
     pdf = canvas.Canvas(buffer, pagesize=letter)
     width, height = letter
-    y = height - 40
 
+    y = height - 40
     pdf.setFont("Helvetica-Bold", 14)
     pdf.drawString(40, y, "Historial de Pagos")
     y -= 30
@@ -217,9 +186,7 @@ def imprimir_pagos(cliente_id):
     pdf.setFont("Helvetica", 10)
     pdf.drawString(40, y, f"Cliente: {cliente.nombre}")
     y -= 15
-    pdf.drawString(40, y, f"Teléfono: {cliente.telefono}")
-    y -= 15
-    pdf.drawString(40, y, f"Fecha préstamo: {cliente.fecha}")
+    pdf.drawString(40, y, f"Fecha: {cliente.fecha}")
     y -= 25
 
     pdf.setFont("Helvetica-Bold", 10)
@@ -231,27 +198,21 @@ def imprimir_pagos(cliente_id):
     y -= 15
 
     pdf.setFont("Helvetica", 10)
+
     total_pagado = 0
 
     for p in cliente.pagos:
-        if y < 60:
-            pdf.showPage()
-            y = height - 40
-
         pdf.drawString(40, y, p.periodo)
         pdf.drawString(140, y, p.fecha)
         pdf.drawString(220, y, f"${p.monto}")
         pdf.drawString(290, y, f"${p.mora}")
         pdf.drawString(360, y, p.estado)
+        y -= 15
 
         if p.estado == "Pagado":
             total_pagado += p.monto + p.mora
 
-        y -= 15
-
     restante = round(cliente.total - total_pagado, 2)
-    if restante < 0:
-        restante = 0
 
     y -= 20
     pdf.setFont("Helvetica-Bold", 10)
@@ -272,9 +233,10 @@ def imprimir_pagos(cliente_id):
     )
 
 
-# ==========================
-# MAIN
-# ==========================
+# =========================
+# 🚀 MAIN
+# =========================
+
 if __name__ == "__main__":
     with app.app_context():
         db.create_all()
