@@ -1,0 +1,623 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Cliente</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+            margin: 0;
+            padding: 0;
+        }
+        
+        .container {
+            max-width: 900px;
+            margin: 40px auto;
+            background: #fff;
+            border-radius: 14px;
+            padding: 30px;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.3);
+        }
+        h1 {
+            color: #2c5364;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            padding: 12px;
+            text-align: center;
+        }
+        th {
+            background: #2c5364;
+            color: #fff;
+        }
+        tr:nth-child(even) {
+            background: #f2f2f2;
+        }
+        .pendiente {
+            color: #b00020;
+            font-weight: bold;
+        }
+        .back {
+            margin-top: 20px;
+            text-align: center;
+        }
+        .back a {
+            color: #2c5364;
+            font-weight: bold;
+            text-decoration: none;
+        }
+        .pendiente { color: #b00020; font-weight: bold; }
+        .pagado { color: #2e7d32; font-weight: bold; }
+        .btn {
+            background: #2c5364;
+            color: white;
+            padding: 6px 12px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        .btn:hover { background: #203a43; }
+        
+        .modal-bg {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.65);
+            backdrop-filter: blur(6px);
+            align-items: center;
+            justify-content: center;
+            z-index: 999;
+        }
+
+        .modal-card {
+            background: #fff;
+            width: 420px;
+            max-width: 95%;
+            border-radius: 18px;
+            box-shadow: 0 30px 70px rgba(0,0,0,0.45);
+            animation: scaleIn .25s ease;
+        }
+
+        @keyframes scaleIn {
+            from { transform: scale(.9); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        .modal-header {
+            background: linear-gradient(135deg, #203a43, #2c5364);
+            color: white;
+            padding: 18px 22px;
+            border-radius: 18px 18px 0 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header h2 {
+            margin: 0;
+            font-size: 20px;
+        }
+
+        .close-btn {
+            cursor: pointer;
+            font-size: 18px;
+            opacity: .8;
+        }
+
+        .close-btn:hover {
+            opacity: 1;
+        }
+
+        .modal-form {
+            padding: 24px;
+        }
+
+        .input-group {
+            margin-bottom: 16px;
+        }
+
+        .input-group label {
+            font-size: 13px;
+            font-weight: bold;
+            color: #555;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 10px 12px;
+            margin-top: 6px;
+            border-radius: 10px;
+            border: 1px solid #ccc;
+            font-size: 14px;
+        }
+
+        .input-group input:focus {
+            outline: none;
+            border-color: #2c5364;
+        }
+
+        .modal-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+            margin-top: 24px;
+        }
+
+        .btn-cancel {
+            background: #b0b0b0;
+            color: white;
+            border: none;
+            padding: 10px 18px;
+            border-radius: 10px;
+            cursor: pointer;
+        }
+
+        .btn-save {
+            background: linear-gradient(135deg, #203a43, #2c5364);
+            color: white;
+            border: none;
+            padding: 10px 18px;
+            border-radius: 10px;
+            cursor: pointer;
+        }
+
+        .btn-save:hover {
+            opacity: .9;
+        }
+
+        .icon-btn {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: white;
+            text-decoration: none;
+            transition: all .2s ease;
+        }
+
+        .icon-btn svg {
+            display: block;
+        }
+
+
+        /* INFO */
+        .icon-btn.info {
+            background: #2c5364;
+        }
+        .icon-btn.info:hover {
+            background: #203a43;
+        }
+
+        /* EDITAR */
+        .icon-btn.edit {
+            background: #ff9800;
+        }
+        .icon-btn.edit:hover {
+            background: #e68900;
+        }
+
+        /* ELIMINAR */
+        .icon-btn.delete {
+            background: #b00020;
+        }
+        .icon-btn.delete:hover {
+            background: #8e0018;
+        }
+
+        /* CONTENEDOR CENTRADO */
+        .led-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 25px 0 35px 0;
+        }
+
+        /* LETRERO */
+        .led-sign {
+            padding: 25px 60px;
+            border-radius: 20px;
+            background: #0b1f26;
+            text-align: center;
+            position: relative;
+            box-shadow: 
+                0 0 20px #00eaff,
+                0 0 40px #00eaff,
+                inset 0 0 15px rgba(255,255,255,0.2);
+        }
+
+        /* TEXTO PRINCIPAL */
+        .led-sign h1 {
+            margin: 0;
+            font-size: 48px;
+            letter-spacing: 4px;
+            color: #ffffff;
+            text-shadow:
+                0 0 5px #00eaff,
+                0 0 10px #00eaff,
+                0 0 20px #00eaff,
+                0 0 40px #00eaff;
+        }
+
+        /* RESALTADO V&G */
+        .led-sign h1 span {
+            color: #ffd700;
+            text-shadow:
+                0 0 5px #ffd700,
+                0 0 15px #ffd700,
+                0 0 30px #ffd700;
+        }
+
+        /* SUBTÍTULO */
+        .led-sign p {
+            margin-top: 8px;
+            font-size: 15px;
+            color: #c7f6ff;
+            letter-spacing: 1px;
+        }
+
+        /* EFECTO LED ANIMADO */
+        .led-sign::before {
+            content: "";
+            position: absolute;
+            inset: -6px;
+            border-radius: 26px;
+            background: linear-gradient(
+                90deg,
+                #00eaff,
+                #ffd700,
+                #00eaff
+            );
+            z-index: -1;
+            animation: ledMove 3s linear infinite;
+        }
+
+        @keyframes ledMove {
+            0% { filter: blur(6px); opacity: 0.8; }
+            50% { filter: blur(10px); opacity: 1; }
+            100% { filter: blur(6px); opacity: 0.8; }
+        }
+
+        /* Animación de pago */
+        @keyframes pagoExitoso {
+            0% {
+                background-color: #fff3cd;
+                transform: scale(0.98);
+                opacity: 0.7;
+            }
+            50% {
+                background-color: #c8e6c9;
+                transform: scale(1.01);
+                opacity: 1;
+            }
+            100% {
+                background-color: transparent;
+                transform: scale(1);
+            }
+        }
+
+        .tr-pagando {
+            animation: pagoExitoso 0.6s ease forwards;
+        }
+
+        @media print {
+
+        body {
+            background: white !important;
+        }
+
+        .icon-btn,
+        .btn,
+        .back,
+        button {
+            display: none !important;
+        }
+
+        .container {
+            box-shadow: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        h1 {
+            margin-bottom: 5px;
+        }
+
+        table {
+            margin-top: 10px;
+        }
+
+        
+    }
+
+    </style>
+</head>
+<body>
+
+    <div class="led-container">
+        <div class="led-sign">
+            <h1>FINANCIERA <span>V&amp;G</span></h1>
+            <p>Control y seguimiento de créditos</p>
+        </div>
+    </div>
+
+<div class="container">
+
+    <div style="display:flex; justify-content:space-between; align-items:center;">
+    
+        <!-- IZQUIERDA: NOMBRE + INFO + EDITAR -->
+        <div style="display:flex; align-items:center; gap:12px;">
+            <h1 style="margin:0;">👤 {{ cliente.nombre }}</h1>
+
+            <!-- INFO -->
+            <button onclick="abrirInfo()"
+                    class="icon-btn info">
+                ℹ
+            </button>
+
+            <!-- EDITAR -->
+            <button onclick="abrirEditar()"
+                    class="icon-btn edit">
+                ✏️
+            </button>
+        </div>
+
+        <a href="/eliminar_cliente/{{ cliente.id }}"
+            onclick="return confirm('⚠️ ¿Seguro que deseas eliminar este cliente? Esta acción no se puede deshacer.');"
+            class="icon-btn delete"
+            title="Eliminar cliente">
+
+                <svg xmlns="http://www.w3.org/2000/svg"
+                    width="18" height="18"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round">
+                    <polyline points="3 6 5 6 21 6"/>
+                    <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>
+                    <path d="M10 11v6"/>
+                    <path d="M14 11v6"/>
+                    <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/>
+                </svg>
+        </a>
+
+    </div>
+
+    {% if cliente.liquidado %}
+    <p style="color:green; font-weight:bold;">✅ CRÉDITO LIQUIDADO</p>
+    {% endif %}
+
+    <p><strong>Monto:</strong> ${{ cliente.monto }}</p>
+        <p><strong>Total a pagar:</strong> ${{ cliente.total }}</p>
+
+        <p>
+            <strong>Total pagado:</strong>
+            <span style="color:#2e7d32; font-weight:bold;">
+                ${{ total_pagado }}
+            </span>
+        </p>
+
+        <p style="font-size:22px;">
+            <strong>💰 Restante:</strong>
+            <span style="color:#b00020; font-weight:bold;">
+                ${{ restante }}
+            </span>
+    </p>
+
+        <strong>Pago {{ cliente.frecuencia | capitalize }}:</strong>
+        ${{ cliente.pago }}
+    </p>
+
+
+    <div style="display:flex; justify-content:flex-end; margin-top:20px;">
+        <button onclick="imprimirPagos()" class="btn">
+          🖨 Imprimir pagos
+        </button>
+    </div>
+
+    <!-- TABLA DE PAGOS -->
+    <table>
+        <tr>
+            <th>{{ cliente.frecuencia | capitalize }}</th>
+            <th>Fecha</th>
+            <th>Monto</th>
+            <th>Estado</th>
+            <th>Acción</th>
+            <th>Mora</th>
+        </tr>
+
+        {% for p in cliente.pagos %}
+        <tr>
+            <td>{{ p.periodo }}</td>
+            <td>{{ p.fecha }}</td>
+            <td>${{ p.monto }}</td>
+            <td class="{{ 'pagado' if p.estado == 'Pagado' else 'pendiente' }}">
+                {{ p.estado }}
+            </td>
+            <td>
+                {% if p.estado.strip() == 'Pendiente' %}
+                    <a href="/abonar/{{ cliente.id }}/{{ p.numero }}"
+                        class="btn"
+                        onclick="return confirmarPago(this);">
+                            💳 Pagar
+                    </a>
+                {% else %}
+                    ✔
+                {% endif %}
+
+            <td style="color:red; font-weight:bold;">
+                    {% if p.mora > 0 %}
+                    ${{ p.mora }} ({{ p.dias_atraso }} días)
+                {% else %}
+                    —
+                {% endif %}
+            </td>
+  
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+
+    <a href="{{ url_for('imprimir_pagos', cliente_id=cliente.id) }}"
+        class="btn btn-primary"
+        target="_blank">
+        🖨️ Imprimir pagos (PDF)
+    </a>
+
+    <div class="back">
+        <a href="/">⬅ Volver</a>
+    </div>
+</div>
+
+<!-- MODAL INFORMACIÓN DEL CLIENTE -->
+<div id="infoModal" style="
+    display:none;
+    position:fixed;
+    top:0;
+    left:0;
+    width:100%;
+    height:100%;
+    background:rgba(0,0,0,.6);
+    justify-content:center;
+    align-items:center;
+    z-index:999;
+">
+
+    <div style="
+        background:white;
+        padding:30px;
+        border-radius:14px;
+        width:420px;
+        max-width:90%;
+        box-shadow:0 20px 50px rgba(0,0,0,.4);
+    ">
+        <h2 style="margin-top:0; color:#2c5364;">ℹ Información del Cliente</h2>
+
+        <p><strong>Nombre:</strong> {{ cliente.nombre }}</p>
+        <p><strong>Teléfono:</strong> {{ cliente.telefono }}</p>
+        <p><strong>Dirección:</strong> {{ cliente.direccion }}</p>
+        <p><strong>Garantía:</strong> {{ cliente.garantia }}</p>
+
+        <hr>
+
+        <p><strong>Monto:</strong> ${{ cliente.monto }}</p>
+        <p><strong>Interés:</strong> {{ cliente.interes }}%</p>
+        <p><strong>Total a pagar:</strong> ${{ cliente.total }}</p>
+        <p><strong>Fecha de registro:</strong> {{ cliente.fecha }}</p>
+
+        <div style="text-align:right; margin-top:20px;">
+            <button onclick="cerrarInfo()"
+                    style="
+                    background:#b00020;
+                    color:white;
+                    border:none;
+                    padding:8px 14px;
+                    border-radius:8px;
+                    cursor:pointer;">
+                Cerrar
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL EDITAR CLIENTE PRO -->
+<div id="editarModal" class="modal-bg">
+
+    <div class="modal-card">
+        <div class="modal-header">
+            <h2>✏️ Editar Cliente</h2>
+            <span onclick="cerrarEditar()" class="close-btn">✖</span>
+        </div>
+
+        <form method="POST" action="/editar_cliente/{{ cliente.id }}" class="modal-form">
+
+            <div class="input-group">
+                <label>Nombre</label>
+                <input type="text" name="nombre" value="{{ cliente.nombre }}" required>
+            </div>
+
+            <div class="input-group">
+                <label>Teléfono</label>
+                <input type="text" name="telefono" value="{{ cliente.telefono }}" required>
+            </div>
+
+            <div class="input-group">
+                <label>Dirección</label>
+                <input type="text" name="direccion" value="{{ cliente.direccion }}" required>
+            </div>
+
+            <div class="input-group">
+                <label>Garantía</label>
+                <input type="text" name="garantia" value="{{ cliente.garantia }}" required>
+            </div>
+
+            <div class="modal-actions">
+                <button type="button" class="btn-cancel" onclick="cerrarEditar()">
+                    Cancelar
+                </button>
+
+                <button type="submit" class="btn-save">
+                    Guardar cambios
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- JS -->
+<script>
+function abrirInfo() {
+    document.getElementById("infoModal").style.display = "flex";
+}
+
+function cerrarInfo() {
+    document.getElementById("infoModal").style.display = "none";
+}
+</script>
+
+<script>
+function abrirEditar() {
+    document.getElementById("editarModal").style.display = "flex";
+}
+
+function cerrarEditar() {
+    document.getElementById("editarModal").style.display = "none";
+}
+</script>
+
+<script>
+function imprimirPagos() {
+    window.print();
+}
+</script>
+
+<script>
+function confirmarPago(btn) {
+    if (!confirm('¿Estás seguro de confirmar este pago?')) {
+        return false;
+    }
+
+    const fila = btn.closest('tr');
+    fila.classList.add('tr-pagando');
+
+    // pequeño delay para que se vea la animación
+    setTimeout(() => {
+        window.location.href = btn.href;
+    }, 350);
+
+    return false;
+}
+</script>
+
+</body>
+</html>

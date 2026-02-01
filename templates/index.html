@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Control de Clientes</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+            margin: 0;
+            padding: 0;
+            color: #333;
+        }
+        .container {
+            max-width: 1100px;
+            margin: 40px auto;
+            background: #fff;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.25);
+        }
+        h1 {
+            margin-top: 0;
+            color: #2c5364;
+        }
+        .top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+        a.btn {
+            background: #2c5364;
+            color: #fff;
+            padding: 12px 20px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: bold;
+            transition: background 0.3s;
+        }
+        a.btn:hover {
+            background: #203a43;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            padding: 14px;
+            text-align: center;
+        }
+        th {
+            background: #2c5364;
+            color: #fff;
+        }
+        tr:nth-child(even) {
+            background: #f2f2f2;
+        }
+        tr:hover {
+            background: #e6f2f7;
+        }
+
+        /* CONTENEDOR CENTRADO */
+        .led-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 25px 0 35px 0;
+        }
+
+        /* LETRERO */
+        .led-sign {
+            padding: 25px 60px;
+            border-radius: 20px;
+            background: #0b1f26;
+            text-align: center;
+            position: relative;
+            box-shadow: 
+                0 0 20px #00eaff,
+                0 0 40px #00eaff,
+                inset 0 0 15px rgba(255,255,255,0.2);
+        }
+
+        /* TEXTO PRINCIPAL */
+        .led-sign h1 {
+            margin: 0;
+            font-size: 48px;
+            letter-spacing: 4px;
+            color: #ffffff;
+            text-shadow:
+                0 0 5px #00eaff,
+                0 0 10px #00eaff,
+                0 0 20px #00eaff,
+                0 0 40px #00eaff;
+        }
+
+        /* RESALTADO V&G */
+        .led-sign h1 span {
+            color: #ffd700;
+            text-shadow:
+                0 0 5px #ffd700,
+                0 0 15px #ffd700,
+                0 0 30px #ffd700;
+        }
+
+        /* SUBTÍTULO */
+        .led-sign p {
+            margin-top: 8px;
+            font-size: 15px;
+            color: #c7f6ff;
+            letter-spacing: 1px;
+        }
+
+        /* EFECTO LED ANIMADO */
+        .led-sign::before {
+            content: "";
+            position: absolute;
+            inset: -6px;
+            border-radius: 26px;
+            background: linear-gradient(
+                90deg,
+                #00eaff,
+                #ffd700,
+                #00eaff
+            );
+            z-index: -1;
+            animation: ledMove 3s linear infinite;
+        }
+
+        @keyframes ledMove {
+            0% { filter: blur(6px); opacity: 0.8; }
+            50% { filter: blur(10px); opacity: 1; }
+            100% { filter: blur(6px); opacity: 0.8; }
+    }
+
+
+    </style>
+</head>
+<body>
+
+    <div class="led-container">
+        <div class="led-sign">
+            <h1>FINANCIERA <span>V&amp;G</span></h1>
+            <p>Control y seguimiento de créditos</p>
+        </div>
+    </div>
+
+<div class="container">
+    <div class="top-bar">
+        <h1>📋 Clientes Registrados</h1>
+        <a class="btn" href="/nuevo">➕ Nuevo Cliente</a>
+    </div>
+
+    <table>
+        <tr>
+            <th>Nombre</th>
+            <th>Monto</th>
+            <th>Total a Pagar</th>
+            <th>Fecha</th>
+        </tr>
+        {% for c in clientes %}
+        <tr>
+            <td>
+                <a href="/cliente/{{ c.id }}" style="font-weight:bold; color:#2c5364; text-decoration:none;">
+                    {{ c.nombre }}
+            </td>  
+                </a>
+            <td>${{ c['monto'] }}</td>
+            <td>${{ c['total'] }}</td>
+            <td>{{ c['fecha'] }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+</div>
+
+</body>
+</html>
+```

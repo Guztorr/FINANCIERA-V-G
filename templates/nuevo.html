@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Nuevo Cliente</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 700px;
+            margin: 50px auto;
+            background: #ffffff;
+            border-radius: 14px;
+            padding: 35px;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.3);
+        }
+        h1 {
+            margin-top: 0;
+            color: #2c5364;
+            text-align: center;
+        }
+        form {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        label {
+            font-weight: bold;
+            color: #203a43;
+        }
+        input {
+            width: 100%;
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid #ccc;
+            font-size: 15px;
+        }
+        input:focus {
+            outline: none;
+            border-color: #2c5364;
+        }
+        .full {
+            grid-column: 1 / 3;
+        }
+        button {
+            background: #2c5364;
+            color: #fff;
+            border: none;
+            padding: 14px;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        button:hover {
+            background: #203a43;
+        }
+        .back {
+            text-align: center;
+            margin-top: 20px;
+        }
+        .back a {
+            color: #2c5364;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        .back a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>➕ Nuevo Cliente</h1>
+
+    <form method="POST">
+        <div>
+            <label>Nombre del cliente</label>
+            <input type="text" name="nombre" required>
+        </div>
+
+        <div>
+            <label>Teléfono</label>
+            <input type="text" name="telefono" required>
+        </div>
+
+        <div class="full">
+            <label>Dirección</label>
+            <input type="text" name="direccion" required>
+        </div>
+
+        <div class="full">
+            <label>Garantía</label>
+            <input type="text" name="garantia" required>
+        </div>
+
+        <div>
+            <label>Monto del préstamo</label>
+            <input type="number" name="monto" step="0.01" required>
+        </div>
+
+        <div>
+            <label>Interés (%)</label>
+            <input type="number" name="interes" step="0.01" required>
+        </div>
+
+        <div>
+            <label>Frecuencia de pago</label>
+            <select name="frecuencia" required
+                    style="width:100%;padding:12px;border-radius:8px;border:1px solid #ccc;">
+                <option value="semanal">Semanal</option>
+                <option value="quincenal">Quincenal</option>
+                <option value="mensual">Mensual</option>
+            </select>
+        </div>
+
+        <div>
+            <label>Número de pagos</label>
+            <input type="number" name="periodos" required>
+        </div>
+
+
+        <div class="full">
+            <button type="submit">💾 Registrar Cliente</button>
+        </div>
+    </form>
+
+    <div class="back">
+        <a href="/">⬅ Volver a clientes</a>
+    </div>
+</div>
+
+</body>
+</html>
+```
