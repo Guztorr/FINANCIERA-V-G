@@ -9,11 +9,14 @@ import io
 app = Flask(__name__)
 
 database_url = os.getenv("DATABASE_URL")
-if database_url and database_url.startswith("postgres://"):
+
+if not database_url:
+    raise RuntimeError("DATABASE_URL no está definida")
+
+if database_url.startswith("postgres://"):
     database_url = database_url.replace("postgres://", "postgresql://", 1)
 
-# 🔐 Configuración PostgreSQL (Render)
-app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv("DATABASE_URL")
+app.config["SQLALCHEMY_DATABASE_URI"] = database_url
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
 db = SQLAlchemy(app)
